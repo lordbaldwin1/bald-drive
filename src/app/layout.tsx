@@ -15,9 +15,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
-    <html lang="en" className={`${GeistSans.variable}`}>
-      <body>{children}</body>
-    </html>
+      <html lang="en" className={`${GeistSans.variable}`}>
+        <body>{children}</body>
+      </html>
     </ClerkProvider>
   );
 }
