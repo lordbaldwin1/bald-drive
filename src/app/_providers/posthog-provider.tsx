@@ -1,4 +1,4 @@
-// app/providers.js
+// app/providers.tsx
 "use client";
 
 import posthog from "posthog-js";
@@ -19,7 +19,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     posthog.init(env.NEXT_PUBLIC_POSTHOG_KEY, {
       api_host: "/ingest",
       ui_host: "https://us.posthog.com",
-      capture_pageview: false,
+      capture_pageview: false, // Disable automatic pageview capture, as we capture manually
     });
   }, []);
 
