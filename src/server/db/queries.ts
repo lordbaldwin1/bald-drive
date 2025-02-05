@@ -6,7 +6,7 @@ import {
   folders_table as foldersSchema,
   type DB_FileType,
 } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, isNull, and } from "drizzle-orm";
 
 export const QUERIES = {
   // Inferred async function because the return type is a Promise
@@ -47,7 +47,16 @@ export const QUERIES = {
       .from(foldersSchema)
       .where(eq(foldersSchema.id, folderId));
     return folder[0];
-  }
+  },
+  getRootFolderForUser: async function (userId: string) {
+    const folder = await db
+      .select()
+      .from(foldersSchema)
+      .where(
+        and(eq(foldersSchema.ownerId, userId), isNull(foldersSchema.parent))
+      );
+    return folder[0];
+  },
 };
 
 export const MUTATIONS = {
