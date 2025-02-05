@@ -20,6 +20,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       api_host: "/ingest",
       ui_host: "https://us.posthog.com",
       capture_pageview: false, // Disable automatic pageview capture, as we capture manually
+      debug: false,
     });
   }, []);
 
