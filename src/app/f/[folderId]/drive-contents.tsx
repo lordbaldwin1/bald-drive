@@ -1,19 +1,19 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
 import { FileRow, FolderRow } from "./file-row";
 import type { files_table, folders_table } from "~/server/db/schema";
 import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { UploadButton } from "../../../components/uploadthing";
 import { useRouter } from "next/navigation";
+import FolderBreadcrumbs from "~/components/folder-breadcrumb";
 
 export default function DriveContents(props: {
   files: (typeof files_table.$inferSelect)[];
   folders: (typeof folders_table.$inferSelect)[];
   parents: (typeof folders_table.$inferSelect)[];
-
   currentFolderId: number;
+  rootFolderId: number;
 }) {
   const navigate = useRouter();
 
@@ -23,22 +23,15 @@ export default function DriveContents(props: {
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center">
             <Link
-              href="/f/2251799813685249"
+              href={`/f/${props.rootFolderId}`}
               className="mr-2 text-gray-300 hover:text-white"
             >
               My Drive
             </Link>
-            {props.parents.map((folder) => (
-              <div key={folder.id} className="flex items-center">
-                <ChevronRight className="mx-2 text-gray-500" size={16} />
-                <Link
-                  href={`/f/${folder.id}`}
-                  className="text-gray-300 hover:text-white"
-                >
-                  {folder.name}
-                </Link>
-              </div>
-            ))}
+            <FolderBreadcrumbs
+              parents={props.parents}
+              rootFolderId={props.rootFolderId}
+            />
           </div>
           <div>
             <SignedOut>
@@ -68,6 +61,7 @@ export default function DriveContents(props: {
           </ul>
         </div>
         <UploadButton
+          className="mt-4"
           endpoint="driveUploader"
           onClientUploadComplete={() => {
             navigate.refresh();
