@@ -5,7 +5,7 @@ import {
   files_table as filesSchema,
   folders_table as foldersSchema,
 } from "~/server/db/schema";
-import { eq, isNull, and } from "drizzle-orm";
+import { eq, isNull, and, inArray } from "drizzle-orm";
 
 export const QUERIES = {
   // Inferred async function because the return type is a Promise
@@ -93,5 +93,49 @@ export const MUTATIONS = {
     ]);
 
     return rootFolderId;
+  },
+
+  deleteFolder: async function (folderId: number) {
+    const gatherAllNestedIds = async (folderId: number) => {
+      const folderIds: number[] = [folderId];
+      const fileIds: number[] = [];
+
+      const subFolders = await db
+        .select({ id: foldersSchema.id })
+        .from(foldersSchema)
+        .where(eq(foldersSchema.parent, folderId));
+
+      const subFiles = await db
+        .select({ id: filesSchema.id })
+        .from(filesSchema)
+        .where(eq(filesSchema.parent, folderId));
+
+      fileIds.push(...subFiles.map((file) => file.id));
+
+      for (const folder of subFolders) {
+        const nestedIds = await gatherAllNestedIds(folder.id);
+        folderIds.push(...nestedIds.folderIds);
+        fileIds.push(...nestedIds.fileIds);
+      }
+
+      return { folderIds, fileIds };
+    };
+
+    const { folderIds, fileIds } = await gatherAllNestedIds(folderId);
+
+    try {
+      await db.transaction(async (tx) => {
+        await tx
+          .delete(filesSchema)
+          .where(inArray(filesSchema.parent, fileIds));
+        await tx
+          .delete(foldersSchema)
+          .where(inArray(foldersSchema.id, folderIds));
+      });
+      console.log("Folder and its contents deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting folder and its contents:", error);
+      throw error;
+    }
   },
 };
