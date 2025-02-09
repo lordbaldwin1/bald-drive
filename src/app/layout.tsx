@@ -3,7 +3,7 @@ import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { PostHogProvider } from "./_providers/posthog-provider";
+import { Toaster } from "~/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Bald Drive",
@@ -18,7 +18,8 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${GeistSans.variable}`}>
         <body>
-          <PostHogProvider>{children}</PostHogProvider>
+          <main>{children}</main>
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

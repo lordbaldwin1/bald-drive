@@ -7,6 +7,9 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { UploadButton } from "../../../components/uploadthing";
 import { useRouter } from "next/navigation";
 import FolderBreadcrumbs from "~/components/folder-breadcrumb";
+import { createFolder } from "~/lib/actions/folders";
+import CreateFolderDialog from "~/components/CreateFolderDialog";
+import { useToast } from "~/hooks/use-toast";
 
 export default function DriveContents(props: {
   files: (typeof files_table.$inferSelect)[];
@@ -16,9 +19,30 @@ export default function DriveContents(props: {
   rootFolderId: number;
 }) {
   const navigate = useRouter();
+  const { toast } = useToast();
+  
+  const handleCreateFolder = async (folderName: string) => {
+    const result = await createFolder(folderName, props.currentFolderId);
+    if (result.error) {
+      toast({
+        title: "Error creating folder",
+        description: result.error,
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    } else {
+      toast({
+        title: "Folder created",
+        description: result.message,
+        duration: 4000,
+      });
+    }
+    navigate.refresh();
+  };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-8 text-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 p-8 text-gray-100">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center">
@@ -33,6 +57,19 @@ export default function DriveContents(props: {
               rootFolderId={props.rootFolderId}
             />
           </div>
+          <div className="flex items-end mb-5 mr-4 space-x-4 ml-auto">
+            <UploadButton
+              className="text-gray-800 ut-button:bg-white ut-button:hover:bg-primary ut-button:text-gray-800 ut-button:h-8 ut-allowed-content:hidden"
+              endpoint="driveUploader"
+              onClientUploadComplete={() => {
+                navigate.refresh();
+              }}
+              input={{
+                folderId: props.currentFolderId,
+              }}
+            />
+            <CreateFolderDialog onCreateFolder={handleCreateFolder} />
+          </div>
           <div>
             <SignedOut>
               <SignInButton />
@@ -42,8 +79,8 @@ export default function DriveContents(props: {
             </SignedIn>
           </div>
         </div>
-        <div className="rounded-lg bg-gray-900 shadow-xl">
-          <div className="border-b border-gray-700 px-6 py-4">
+        <div className="rounded-lg bg-gray-800 shadow-xl">
+          <div className="px-6 py-4">
             <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-400">
               <div className="col-span-6">Name</div>
               <div className="col-span-2">Type</div>
@@ -60,16 +97,6 @@ export default function DriveContents(props: {
             ))}
           </ul>
         </div>
-        <UploadButton
-          className="mt-4"
-          endpoint="driveUploader"
-          onClientUploadComplete={() => {
-            navigate.refresh();
-          }}
-          input={{
-            folderId: props.currentFolderId,
-          }}
-        />
       </div>
     </div>
   );

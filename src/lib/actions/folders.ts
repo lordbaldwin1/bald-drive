@@ -70,3 +70,41 @@ async function gatherAllNestedIds(folderId: number) {
 
   return { folderIds, fileIds };
 }
+
+export async function createFolder(folderName: string, parent: number) {
+  const session = await auth();
+  if (!session.userId) {
+    throw new Error("Unauthorized");
+  }
+
+  if (folderName.length <= 0) {
+    return { error: "Folder name cannot be empty" };
+  }
+
+  const [folder] = await db
+    .select()
+    .from(folders_table)
+    .where(
+      and(
+        eq(folders_table.name, folderName),
+        eq(folders_table.parent, parent),
+        eq(folders_table.ownerId, session.userId),
+      ),
+    );
+
+  if (folder) {
+    return { error: "Folder already exists" };
+  }
+
+  const dbCreateResult = await db
+    .insert(folders_table)
+    .values({ name: folderName, parent, ownerId: session.userId });
+  
+  if (!dbCreateResult) {
+    return { error: "Error creating folder" };
+  }
+
+  const c = await cookies();
+  c.set("force-refresh", JSON.stringify(Math.random()));
+  return { success: true, message: "Folder created successfully" };
+}
