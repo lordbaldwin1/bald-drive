@@ -11,12 +11,12 @@ export default async function DrivePage() {
   }
 
   const rootFolder = await QUERIES.getRootFolderForUser(session.userId);
-
   if (!rootFolder) {
     return (
       <form
         action={async () => {
           "use server";
+
           const session = await auth();
 
           if (!session.userId) {
