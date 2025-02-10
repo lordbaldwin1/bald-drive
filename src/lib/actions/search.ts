@@ -12,6 +12,10 @@ export async function searchFolders(searchTerm: string) {
       return []; // Ensure consistent return type
     }
 
+    if (!searchTerm.trim()) {
+      return [];
+    }
+
     const folderResults = await db
       .select()
       .from(folders_table)
@@ -30,6 +34,10 @@ export async function searchFiles(searchTerm: string) {
     if (!session.userId) {
       console.error("Unauthorized access attempt.");
       return []; // Ensure consistent return type
+    }
+
+    if (!searchTerm.trim()) {
+      return [];
     }
 
     const fileResults = await db

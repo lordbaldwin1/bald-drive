@@ -1,84 +1,97 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { searchFolders, searchFiles } from "~/lib/actions/search";
 import type { DB_FileType, DB_FolderType } from "~/server/db/schema";
-import { Search } from "lucide-react";
+import { FileIcon, FolderIcon, Search } from "lucide-react";
+import { useDebounce } from "~/hooks/useDebounce";
+import Link from "next/link";
 import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  DialogTitle,
-} from "~/components/ui/dialog";
-import {
-  Command,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "~/components/ui/command";
-//import { useDebounce } from "~/hooks/useDebounce";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { Input } from "~/components/ui/input";
 
 export default function SearchCommand() {
   const [query, setQuery] = useState("");
-  //const [debouncedQuery] = useDebounce(query, 500);
   const [folderResults, setFolderResults] = useState<DB_FolderType[]>([]);
   const [fileResults, setFileResults] = useState<DB_FileType[]>([]);
   const [open, setOpen] = useState(false);
 
-  const handleSearch = async (value: string) => {
-    setQuery(value);
+  const debouncedQuery = useDebounce(query, 100);
 
-    if (!value) {
+  useEffect(() => {
+    if (!debouncedQuery) {
       setFolderResults([]);
       setFileResults([]);
       return;
     }
-
-    const folders: DB_FolderType[] = await searchFolders(value);
-    const files: DB_FileType[] = await searchFiles(value);
-
+    const fetchResults = async () => {
+      const folders = await searchFolders(debouncedQuery);
+      const files = await searchFiles(debouncedQuery);
       setFolderResults(folders);
       setFileResults(files);
-  };
+    };
+    void fetchResults();
+  }, [debouncedQuery]);
 
   return (
-    <div>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <button className="rounded-full bg-gray-100 p-2 hover:bg-gray-200">
-            <Search size={18} />
-          </button>
-        </DialogTrigger>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="rounded-full bg-gray-100 p-2 hover:bg-primary text-black">
+          <Search size={18} />
+        </button>
+      </PopoverTrigger>
 
-        <DialogContent className="max-w-md">
-          <DialogTitle>Search</DialogTitle>
-          <Command>
-            <CommandInput
-              placeholder="Search files & folders..."
-              value={query}
-              onValueChange={handleSearch}
-              className="text-lg"
-            />
-            <CommandList>
-              {folderResults.length > 0 ? (
-                <>
-                  <CommandGroup heading="Folders">
-                    {folderResults.map((folder) => (
-                      <CommandItem key={folder.id}>{folder.name}</CommandItem>
-                    ))}
-                  </CommandGroup>
-                  <CommandGroup heading="Files">
-                    {fileResults.map((file) => (
-                      <CommandItem key={file.id}>{file.name}</CommandItem>
-                    ))}
-                  </CommandGroup>
-                </>
-              ) : (
-                <CommandItem>No results found.</CommandItem>
-              )}
-            </CommandList>
-          </Command>
-        </DialogContent>
-      </Dialog>
-    </div>
+      <PopoverContent className="mt-4 w-80 p-2 bg-gray-800 text-white">
+        <Input
+          placeholder="Search files & folders..."
+          value={query}
+          onChange={(e) => {
+            console.log("User typed:", e.target.value);
+            setQuery(e.target.value);
+            setOpen(true);
+          }}
+        />
+
+        <div className="mt-4 max-h-60 overflow-y-auto">
+          {folderResults.length > 0 || fileResults.length > 0 ? (
+            <>
+              <p className="px-2 text-xs font-semibold text-gray-500">
+                Folders
+              </p>
+              {folderResults.map((folder) => (
+                <Link
+                  key={folder.id}
+                  href={`/f/${folder.id}`}
+                  className="block rounded px-3 py-2 hover:text-blue-400"
+                  onClick={() => setOpen(false)}
+                >
+                  <FolderIcon className="mr-2 inline-block" size={14} />
+                  {folder.name}
+                </Link>
+              ))}
+
+              <p className="mt-2 px-2 text-xs font-semibold text-gray-500">
+                Files
+              </p>
+              {fileResults.map((file) => (
+                <Link
+                  key={file.id}
+                  href={file.url}
+                  target="_blank"
+                  className="block rounded px-3 py-2 hover:text-blue-400"
+                  onClick={() => setOpen(false)}
+                >
+                  <FileIcon className="mr-2 inline-block" size={14} />
+                  {file.name}
+                </Link>
+              ))}
+            </>
+          ) : (
+            <p className="p-2 text-center text-gray-500">No results found.</p>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
