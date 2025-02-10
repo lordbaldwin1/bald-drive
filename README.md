@@ -7,7 +7,8 @@
 - [x] Add auth
 - [x] Add file uploading
 - [x] Add analytics
-
+- [ ] Add search bar for folders and files
+- [ ] Add error for creating folder with same name as one in current directory
 
 ## NOTES FOR PRODUCTION APP
 

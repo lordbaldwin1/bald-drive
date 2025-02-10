@@ -10,6 +10,7 @@ import FolderBreadcrumbs from "~/components/folder-breadcrumb";
 import { createFolder } from "~/lib/actions/folders";
 import CreateFolderDialog from "~/components/CreateFolderDialog";
 import { useToast } from "~/hooks/use-toast";
+import SearchCommand from "./searchcommand";
 
 export default function DriveContents(props: {
   files: (typeof files_table.$inferSelect)[];
@@ -69,6 +70,7 @@ export default function DriveContents(props: {
               }}
             />
             <CreateFolderDialog onCreateFolder={handleCreateFolder} />
+            <SearchCommand />
           </div>
           <div>
             <SignedOut>

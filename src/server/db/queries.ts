@@ -5,7 +5,7 @@ import {
   files_table as filesSchema,
   folders_table as foldersSchema,
 } from "~/server/db/schema";
-import { eq, isNull, and } from "drizzle-orm";
+import { eq, isNull, and, like } from "drizzle-orm";
 
 export const QUERIES = {
   // Inferred async function because the return type is a Promise
@@ -55,6 +55,28 @@ export const QUERIES = {
         and(eq(foldersSchema.ownerId, userId), isNull(foldersSchema.parent)),
       );
     return folder[0];
+  },
+  getSearchResults: async function (userId: string, searchTerm: string) {
+    const files = await db
+      .select()
+      .from(filesSchema)
+      .where(
+        and(
+          eq(filesSchema.ownerId, userId),
+          like(filesSchema.name, `%${searchTerm}%`),
+        ),
+      );
+    const folders = await db
+      .select()
+      .from(foldersSchema)
+      .where(
+        and(
+          eq(foldersSchema.ownerId, userId),
+          like(foldersSchema.name, `%${searchTerm}%`),
+        ),
+      );
+
+    return { files, folders };
   },
 };
 
