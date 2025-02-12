@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { searchFolders, searchFiles } from "~/lib/actions/search";
 import type { DB_FileType, DB_FolderType } from "~/server/db/schema";
