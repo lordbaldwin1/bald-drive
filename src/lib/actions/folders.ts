@@ -99,7 +99,7 @@ export async function createFolder(folderName: string, parent: number) {
   const dbCreateResult = await db
     .insert(folders_table)
     .values({ name: folderName, parent, ownerId: session.userId });
-  
+
   if (!dbCreateResult) {
     return { error: "Error creating folder" };
   }
@@ -107,4 +107,32 @@ export async function createFolder(folderName: string, parent: number) {
   const c = await cookies();
   c.set("force-refresh", JSON.stringify(Math.random()));
   return { success: true, message: "Folder created successfully" };
+}
+
+export async function getChildren(folderId: number) {
+  const session = await auth();
+  if (!session.userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const children = await db
+    .select({ id: folders_table.id, name: folders_table.name })
+    .from(folders_table)
+    .where(eq(folders_table.parent, folderId));
+
+  return children;
+}
+
+export async function getAllFolders() {
+  const session = await auth();
+  if (!session.userId) {
+    throw new Error("Unauthorized");
+  }
+  
+  const folders = await db
+    .select({ id: folders_table.id, name: folders_table.name, parent: folders_table.parent })
+    .from(folders_table)
+    .where(eq(folders_table.ownerId, session.userId));
+
+  return folders;
 }

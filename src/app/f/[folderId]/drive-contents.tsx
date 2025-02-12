@@ -7,9 +7,7 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { UploadButton } from "../../../components/uploadthing";
 import { useRouter } from "next/navigation";
 import FolderBreadcrumbs from "~/components/folder-breadcrumb";
-import { createFolder } from "~/lib/actions/folders";
 import CreateFolderDialog from "~/components/CreateFolderDialog";
-import { useToast } from "~/hooks/use-toast";
 import SearchCommand from "../../../components/searchcommand";
 
 export default function DriveContents(props: {
@@ -20,27 +18,6 @@ export default function DriveContents(props: {
   rootFolderId: number;
 }) {
   const navigate = useRouter();
-  const { toast } = useToast();
-  
-  const handleCreateFolder = async (folderName: string) => {
-    const result = await createFolder(folderName, props.currentFolderId);
-    if (result.error) {
-      toast({
-        title: "Error creating folder",
-        description: result.error,
-        variant: "destructive",
-        duration: 4000,
-      });
-      return;
-    } else {
-      toast({
-        title: "Folder created",
-        description: result.message,
-        duration: 4000,
-      });
-    }
-    navigate.refresh();
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 p-8 text-gray-100">
@@ -69,7 +46,7 @@ export default function DriveContents(props: {
                 folderId: props.currentFolderId,
               }}
             />
-            <CreateFolderDialog onCreateFolder={handleCreateFolder} />
+            <CreateFolderDialog currentFolderId={props.currentFolderId} />
             <SearchCommand />
           </div>
           <div>
