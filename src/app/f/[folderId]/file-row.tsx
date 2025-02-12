@@ -7,6 +7,7 @@ import { deleteFolder } from "~/lib/actions/folders";
 
 export function FileRow(props: { file: typeof files_table.$inferSelect }) {
   const { file } = props;
+  const fileExtension = file.name.split(".").pop();
   return (
     <li
       key={file.id}
@@ -22,7 +23,7 @@ export function FileRow(props: { file: typeof files_table.$inferSelect }) {
             {file.name}
           </a>
         </div>
-        <div className="col-span-2 text-gray-400">{"file"}</div>
+        <div className="col-span-2 text-gray-400">{fileExtension}</div>
         <div className="col-span-3 text-gray-400">{file.size}</div>
         <div className="col-span-1 text-gray-400">
           <Button

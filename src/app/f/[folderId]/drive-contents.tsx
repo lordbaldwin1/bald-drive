@@ -10,7 +10,7 @@ import FolderBreadcrumbs from "~/components/folder-breadcrumb";
 import { createFolder } from "~/lib/actions/folders";
 import CreateFolderDialog from "~/components/CreateFolderDialog";
 import { useToast } from "~/hooks/use-toast";
-import SearchCommand from "./searchcommand";
+import SearchCommand from "../../../components/searchcommand";
 
 export default function DriveContents(props: {
   files: (typeof files_table.$inferSelect)[];
