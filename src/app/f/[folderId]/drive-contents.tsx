@@ -25,6 +25,7 @@ export default function DriveContents(props: {
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center">
             <Link
+              prefetch={true}
               href={`/f/${props.rootFolderId}`}
               className="mr-2 text-gray-300 hover:text-white"
             >
