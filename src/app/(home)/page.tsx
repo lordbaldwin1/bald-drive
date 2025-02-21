@@ -3,7 +3,13 @@ import { CloudIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth();
+
+  if (session.userId) {
+    return redirect("/drive");
+  }
+
   return (
     <>
     <CloudIcon className="mx-auto mt-16 text-gray-300" size={128} />
